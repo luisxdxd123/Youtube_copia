@@ -1,0 +1,24 @@
+# Configuración para subida de archivos grandes
+php_value upload_max_filesize 2048M
+php_value post_max_size 2048M
+php_value max_execution_time 600
+php_value max_input_time 600
+php_value memory_limit 1024M
+
+# Permitir videos de gran tamaño
+php_value max_file_uploads 20
+
+# Configuración de errores (opcional para desarrollo)
+php_flag display_errors On
+php_flag log_errors On
+
+# Headers de seguridad
+Header always set X-Content-Type-Options nosniff
+Header always set X-Frame-Options DENY
+Header always set X-XSS-Protection "1; mode=block"
+
+# Permitir archivos de video
+<FilesMatch "\.(mp4|avi|mov|wmv|flv|webm|mkv|3gp)$">
+    Order allow,deny
+    Allow from all
+</FilesMatch> 

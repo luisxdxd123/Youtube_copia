@@ -1,0 +1,23 @@
+# Configuración específica para frontend - Subida de videos grandes
+php_value upload_max_filesize 2048M
+php_value post_max_size 2048M
+php_value max_execution_time 600
+php_value max_input_time 600
+php_value memory_limit 1024M
+php_value max_file_uploads 20
+
+# Activar uploads
+php_flag file_uploads On
+
+# Configuración adicional para videos grandes
+php_value default_socket_timeout 600
+
+# Permitir archivos de video
+<FilesMatch "\.(mp4|avi|mov|wmv|flv|webm|mkv|3gp|m4v)$">
+    Order allow,deny
+    Allow from all
+</FilesMatch>
+
+# Configuración de errores para desarrollo
+php_flag display_errors On
+php_flag log_errors On 
