@@ -16,6 +16,69 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+// Si es una petición AJAX para subir el video
+if (isset($_FILES['video']) && isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+    $response = array();
+    
+    $title = trim($_POST['title'] ?? '');
+    $description = trim($_POST['description'] ?? '');
+    $category = $_POST['category'] ?? '';
+    $video = $_FILES['video'];
+    
+    if (empty($title)) {
+        $response['error'] = 'El título es obligatorio.';
+    } elseif ($video['error'] !== UPLOAD_ERR_OK) {
+        switch ($video['error']) {
+            case UPLOAD_ERR_INI_SIZE:
+                $response['error'] = "El archivo es demasiado grande. Límite del servidor: " . ini_get('upload_max_filesize');
+                break;
+            case UPLOAD_ERR_FORM_SIZE:
+                $response['error'] = "El archivo excede el tamaño máximo permitido por el formulario.";
+                break;
+            case UPLOAD_ERR_PARTIAL:
+                $response['error'] = "El archivo se subió parcialmente. Intenta de nuevo.";
+                break;
+            case UPLOAD_ERR_NO_FILE:
+                $response['error'] = "No se seleccionó ningún archivo.";
+                break;
+            default:
+                $response['error'] = "Error al subir el archivo (código: " . $video['error'] . ")";
+        }
+    } else {
+        $upload_dir = '../uploads/videos/';
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0777, true);
+        }
+        
+        $file_extension = pathinfo($video['name'], PATHINFO_EXTENSION);
+        $video_name = uniqid('video_') . '.' . $file_extension;
+        $video_path = $upload_dir . $video_name;
+        
+        if (move_uploaded_file($video['tmp_name'], $video_path)) {
+            $duration = 120; // Valor por defecto
+            
+            $stmt = $pdo->prepare("INSERT INTO videos (user_id, title, description, video_path, duration, category) VALUES (?, ?, ?, ?, ?, ?)");
+            
+            if ($stmt->execute([$_SESSION['user_id'], $title, $description, $video_path, $duration, $category])) {
+                $video_id = $pdo->lastInsertId();
+                $response['success'] = true;
+                $response['video_id'] = $video_id;
+            } else {
+                $response['error'] = 'Error al guardar en la base de datos';
+                if (file_exists($video_path)) {
+                    unlink($video_path);
+                }
+            }
+        } else {
+            $response['error'] = 'No se pudo mover el archivo al directorio de destino.';
+        }
+    }
+    
+    header('Content-Type: application/json');
+    echo json_encode($response);
+    exit;
+}
+
 $error = '';
 $success = '';
 $debug_info = [];
@@ -25,119 +88,6 @@ $max_upload = ini_get('upload_max_filesize');
 $max_post = ini_get('post_max_size');
 $memory_limit = ini_get('memory_limit');
 $max_execution_time = ini_get('max_execution_time');
-
-if ($_POST) {
-    $title = trim($_POST['title'] ?? '');
-    $description = trim($_POST['description'] ?? '');
-    $category = $_POST['category'] ?? '';
-    
-    // Debug: verificar si se recibió el archivo
-    $debug_info[] = "POST recibido";
-    $debug_info[] = "Título: " . ($title ?: "vacío");
-    
-    if (!isset($_FILES['video'])) {
-        $error = 'No se recibió ningún archivo. Verifica que el formulario permita archivos.';
-        $debug_info[] = "ERROR: \$_FILES['video'] no existe";
-    } else {
-        $video = $_FILES['video'];
-        $debug_info[] = "Archivo recibido: " . $video['name'];
-        $debug_info[] = "Tamaño: " . ($video['size'] ?? 0) . " bytes";
-        $debug_info[] = "Tipo: " . ($video['type'] ?? 'desconocido');
-        $debug_info[] = "Error code: " . ($video['error'] ?? 'desconocido');
-        
-        if (empty($title)) {
-            $error = 'El título es obligatorio.';
-        } elseif ($video['error'] !== UPLOAD_ERR_OK) {
-            // Detalles específicos del error
-            switch ($video['error']) {
-                case UPLOAD_ERR_INI_SIZE:
-                    $error = "El archivo es demasiado grande. Límite del servidor: $max_upload";
-                    break;
-                case UPLOAD_ERR_FORM_SIZE:
-                    $error = "El archivo excede el tamaño máximo permitido por el formulario.";
-                    break;
-                case UPLOAD_ERR_PARTIAL:
-                    $error = "El archivo se subió parcialmente. Intenta de nuevo.";
-                    break;
-                case UPLOAD_ERR_NO_FILE:
-                    $error = "No se seleccionó ningún archivo.";
-                    break;
-                case UPLOAD_ERR_NO_TMP_DIR:
-                    $error = "Error del servidor: falta directorio temporal.";
-                    break;
-                case UPLOAD_ERR_CANT_WRITE:
-                    $error = "Error del servidor: no se puede escribir el archivo.";
-                    break;
-                default:
-                    $error = "Error desconocido al subir el archivo (código: " . $video['error'] . ")";
-            }
-        } elseif ($video['size'] == 0) {
-            $error = 'El archivo está vacío o no se pudo leer.';
-        } else {
-            // Crear directorios si no existen
-            $upload_dir = '../uploads/videos/';
-            if (!is_dir($upload_dir)) {
-                if (!mkdir($upload_dir, 0777, true)) {
-                    $error = 'No se pudo crear el directorio de videos.';
-                } else {
-                    $debug_info[] = "Directorio creado: $upload_dir";
-                }
-            } else {
-                $debug_info[] = "Directorio existe: $upload_dir";
-            }
-            
-            if (!$error) {
-                // Verificar permisos de escritura
-                if (!is_writable($upload_dir)) {
-                    $error = 'No hay permisos de escritura en el directorio de videos.';
-                } else {
-                    $debug_info[] = "Permisos de escritura OK";
-                    
-                    // Generar nombre único para el archivo
-                    $file_extension = pathinfo($video['name'], PATHINFO_EXTENSION);
-                    $video_name = uniqid('video_') . '.' . $file_extension;
-                    $video_path = $upload_dir . $video_name;
-                    
-                    $debug_info[] = "Intentando mover archivo a: $video_path";
-                    
-                    if (move_uploaded_file($video['tmp_name'], $video_path)) {
-                        $debug_info[] = "Archivo movido exitosamente";
-                        
-                        // Verificar que el archivo se creó correctamente
-                        if (file_exists($video_path)) {
-                            $file_size = filesize($video_path);
-                            $debug_info[] = "Archivo guardado, tamaño: $file_size bytes";
-                            
-                            $duration = 120; // Valor por defecto
-                            
-                            // Guardar en base de datos
-                            $stmt = $pdo->prepare("INSERT INTO videos (user_id, title, description, video_path, duration, category) VALUES (?, ?, ?, ?, ?, ?)");
-                            
-                            if ($stmt->execute([$_SESSION['user_id'], $title, $description, $video_path, $duration, $category])) {
-                                $video_id = $pdo->lastInsertId();
-                                $debug_info[] = "Video guardado en BD con ID: $video_id";
-                                header("Location: watch.php?v=$video_id");
-                                exit;
-                            } else {
-                                $error = 'Error al guardar en la base de datos: ' . implode(', ', $stmt->errorInfo());
-                                if (file_exists($video_path)) {
-                                    unlink($video_path);
-                                }
-                            }
-                        } else {
-                            $error = 'El archivo no se guardó correctamente.';
-                        }
-                    } else {
-                        $error = 'No se pudo mover el archivo al directorio de destino.';
-                        $debug_info[] = "ERROR: move_uploaded_file falló";
-                        $debug_info[] = "Archivo temporal: " . $video['tmp_name'];
-                        $debug_info[] = "¿Existe archivo temporal? " . (file_exists($video['tmp_name']) ? 'SÍ' : 'NO');
-                    }
-                }
-            }
-        }
-    }
-}
 ?>
 
 <!DOCTYPE html>
@@ -209,7 +159,7 @@ if ($_POST) {
             </div>
             <?php endif; ?>
 
-            <form method="POST" enctype="multipart/form-data" class="space-y-6">
+            <form id="uploadForm" method="POST" enctype="multipart/form-data" class="space-y-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         <i class="fas fa-video mr-2"></i>Archivo de Video *
@@ -224,6 +174,14 @@ if ($_POST) {
                         <?php endif; ?>
                     </p>
                     <div id="fileInfo" class="text-sm text-gray-600 mt-2"></div>
+                </div>
+
+                <!-- Barra de Progreso (inicialmente oculta) -->
+                <div id="uploadProgress" class="hidden">
+                    <div class="w-full bg-gray-200 rounded-full h-4 mb-2">
+                        <div id="progressBar" class="bg-red-600 h-4 rounded-full text-xs leading-none text-center text-white" style="width: 0%">0%</div>
+                    </div>
+                    <p id="uploadStatus" class="text-sm text-gray-600"></p>
                 </div>
 
                 <div>
@@ -294,6 +252,63 @@ if ($_POST) {
                 fileInfo.innerHTML = '';
             }
         }
+
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const xhr = new XMLHttpRequest();
+            const progressBar = document.getElementById('progressBar');
+            const uploadStatus = document.getElementById('uploadStatus');
+            const uploadProgress = document.getElementById('uploadProgress');
+            
+            // Mostrar la barra de progreso
+            uploadProgress.classList.remove('hidden');
+            
+            xhr.upload.addEventListener('progress', function(e) {
+                if (e.lengthComputable) {
+                    const percentComplete = (e.loaded / e.total) * 100;
+                    const percentage = percentComplete.toFixed(2);
+                    progressBar.style.width = percentage + '%';
+                    progressBar.textContent = percentage + '%';
+                    
+                    // Calcular velocidad y tiempo restante
+                    const speed = e.loaded / (Date.now() - startTime) * 1000; // bytes por segundo
+                    const remainingBytes = e.total - e.loaded;
+                    const remainingTime = remainingBytes / speed; // segundos restantes
+                    
+                    uploadStatus.textContent = `Velocidad: ${(speed / (1024 * 1024)).toFixed(2)} MB/s - Tiempo restante: ${Math.ceil(remainingTime)}s`;
+                }
+            });
+
+            const startTime = Date.now();
+            
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+                            if (response.success) {
+                                window.location.href = `watch.php?v=${response.video_id}`;
+                            } else {
+                                alert(response.error || 'Error al subir el video');
+                                uploadProgress.classList.add('hidden');
+                            }
+                        } catch (e) {
+                            alert('Error al procesar la respuesta del servidor');
+                            uploadProgress.classList.add('hidden');
+                        }
+                    } else {
+                        alert('Error en la conexión con el servidor');
+                        uploadProgress.classList.add('hidden');
+                    }
+                }
+            };
+            
+            xhr.open('POST', 'upload.php', true);
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            xhr.send(formData);
+        });
     </script>
 </body>
 </html> 
