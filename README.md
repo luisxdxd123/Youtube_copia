@@ -1,4 +1,4 @@
-# YuTube Clone - Plataforma de Videos
+# videoNetBandera - Plataforma de Videos
 
 Un clon completo de YouTube desarrollado en PHP con todas las funcionalidades principales: subir videos, comentarios, likes, sistema de usuarios y más.
 

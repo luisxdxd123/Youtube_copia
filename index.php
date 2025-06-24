@@ -16,7 +16,7 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YuTube - Plataforma de Videos</title>
+    <title>videoNetBandera - Plataforma de Videos</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -26,7 +26,7 @@ try {
         <div class="container mx-auto px-4 py-3 flex items-center justify-between">
             <a href="index.php" class="flex items-center space-x-2">
                 <i class="fab fa-youtube text-red-600 text-3xl"></i>
-                <span class="text-2xl font-bold">YuTube</span>
+                <span class="text-2xl font-bold">videoNetBandera</span>
             </a>
 
             <div class="flex-1 max-w-md mx-4">

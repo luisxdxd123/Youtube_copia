@@ -145,7 +145,7 @@ if ($_POST) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Subir Video - YuTube</title>
+    <title>Subir Video - videoNetBandera</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -154,7 +154,7 @@ if ($_POST) {
         <div class="container mx-auto px-4 py-3 flex items-center justify-between">
             <a href="../index.php" class="flex items-center space-x-2">
                 <i class="fab fa-youtube text-red-600 text-2xl"></i>
-                <span class="text-xl font-bold">YuTube</span>
+                <span class="text-xl font-bold">videoNetBandera</span>
             </a>
             <div class="flex items-center space-x-4">
                 <span class="text-gray-600">Hola, <?= htmlspecialchars($_SESSION['first_name']) ?></span>

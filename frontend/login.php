@@ -37,7 +37,7 @@ if ($_POST) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión - YuTube</title>
+    <title>Iniciar Sesión - videoNetBandera</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -46,7 +46,7 @@ if ($_POST) {
         <div class="text-center mb-8">
             <a href="../index.php" class="inline-flex items-center space-x-2">
                 <i class="fab fa-youtube text-red-600 text-4xl"></i>
-                <span class="text-3xl font-bold text-gray-800">YuTube</span>
+                <span class="text-3xl font-bold text-gray-800">videoNetBandera</span>
             </a>
             <p class="text-gray-600 mt-2">Inicia sesión en tu cuenta</p>
         </div>
