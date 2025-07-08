@@ -152,28 +152,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Subir Video - videoNetBandera</title>
+    <title>Subir Video - YuTube</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'yutube': {
+                            50: '#fef2f2',
+                            100: '#fee2e2',
+                            500: '#ef4444',
+                            600: '#dc2626',
+                            700: '#b91c1c',
+                        },
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    </style>
 </head>
-<body class="bg-gray-100">
-    <header class="bg-white shadow-md">
-        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
-            <a href="../index.php" class="flex items-center space-x-2">
-                <i class="fab fa-youtube text-red-600 text-2xl"></i>
-                <span class="text-xl font-bold">videoNetBandera</span>
-            </a>
-            <div class="flex items-center space-x-4">
-                <span class="text-gray-600">Hola, <?= htmlspecialchars($_SESSION['first_name']) ?></span>
-                <a href="logout.php" class="text-red-600 hover:text-red-800">Cerrar Sesión</a>
-            </div>
-        </div>
-    </header>
+<body class="bg-gray-50 font-sans">
+    <?php include 'header.php'; ?>
 
-    <div class="container mx-auto px-4 py-8 max-w-2xl">
+    <div class="container mx-auto px-4 py-8 mt-16 max-w-2xl">
         <div class="bg-white rounded-lg shadow-lg p-8">
             <h1 class="text-3xl font-bold text-gray-800 mb-8 flex items-center">
-                <i class="fas fa-upload mr-3 text-red-600"></i>
+                <i class="fas fa-upload mr-3 text-yutube-600"></i>
                 Subir Video
             </h1>
 
@@ -222,7 +240,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         Título del Video
                     </label>
                     <input type="text" name="title" id="title" required
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500">
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-yutube-500 focus:border-yutube-500">
                 </div>
 
                 <div>
@@ -230,7 +248,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         Descripción
                     </label>
                     <textarea name="description" id="description" rows="4"
-                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500"></textarea>
+                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-yutube-500 focus:border-yutube-500"></textarea>
                 </div>
 
                 <div>
@@ -238,7 +256,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         Categoría
                     </label>
                     <select name="category" id="category" required
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500">
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-yutube-500 focus:border-yutube-500">
                         <option value="">Selecciona una categoría</option>
                         <option value="gaming">Gaming</option>
                         <option value="music">Música</option>
@@ -255,7 +273,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         Archivo de Video
                     </label>
                     <input type="file" name="video" id="video" required accept="video/*"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-yutube-500 focus:border-yutube-500"
                            onchange="showFileInfo(this, 'videoInfo')">
                     <p class="mt-1 text-sm text-gray-500">
                         Formatos aceptados: MP4, AVI, MOV, etc. Máximo 2GB
@@ -268,7 +286,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         Miniatura del Video (Opcional)
                     </label>
                     <input type="file" name="thumbnail" id="thumbnail" accept="image/*"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500">
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-yutube-500 focus:border-yutube-500">
                     <p class="mt-1 text-sm text-gray-500">
                         Formatos aceptados: JPG, PNG, GIF. Tamaño recomendado: 1280x720 píxeles
                     </p>
@@ -284,7 +302,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <span id="uploadPercentage">0%</span>
                     </div>
                     <div class="w-full bg-gray-200 rounded-full h-4">
-                        <div id="progressBar" class="bg-red-600 h-4 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        <div id="progressBar" class="bg-yutube-600 h-4 rounded-full transition-all duration-300" style="width: 0%"></div>
                     </div>
                     <div class="mt-2 text-sm text-gray-500">
                         <span id="uploadSpeed">Velocidad: -- MB/s</span>
@@ -294,11 +312,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <div class="flex space-x-4">
-                    <button type="submit" class="flex-1 bg-red-600 text-white py-3 px-6 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                    <button type="submit" class="flex-1 bg-yutube-600 text-white py-3 px-6 rounded-lg hover:bg-yutube-700 focus:outline-none focus:ring-2 focus:ring-yutube-500 focus:ring-offset-2">
                         <i class="fas fa-upload mr-2"></i>
                         Subir Video
                     </button>
-                    <a href="../index.php" class="flex-1 bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 text-center">
+                    <a href="index.php" class="flex-1 bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 text-center">
                         <i class="fas fa-times mr-2"></i>
                         Cancelar
                     </a>

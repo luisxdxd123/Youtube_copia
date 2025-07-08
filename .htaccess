@@ -1,12 +1,12 @@
-# Configuración para subida de archivos grandes
-php_value upload_max_filesize 2048M
-php_value post_max_size 2048M
-php_value max_execution_time 600
-php_value max_input_time 600
-php_value memory_limit 1024M
+# Configuración para subida de archivos extremadamente grandes
+php_value upload_max_filesize 8192M
+php_value post_max_size 8192M
+php_value max_execution_time 7200
+php_value max_input_time 7200
+php_value memory_limit 8192M
 
 # Permitir videos de gran tamaño
-php_value max_file_uploads 20
+php_value max_file_uploads 50
 
 # Configuración de errores (opcional para desarrollo)
 php_flag display_errors On
@@ -14,11 +14,44 @@ php_flag log_errors On
 
 # Headers de seguridad
 Header always set X-Content-Type-Options nosniff
-Header always set X-Frame-Options DENY
+Header always set X-Frame-Options SAMEORIGIN
 Header always set X-XSS-Protection "1; mode=block"
 
-# Permitir archivos de video
-<FilesMatch "\.(mp4|avi|mov|wmv|flv|webm|mkv|3gp)$">
+# Permitir archivos de video y miniaturas
+<FilesMatch "\.(mp4|avi|mov|wmv|flv|webm|mkv|3gp|jpg|jpeg|png|gif)$">
     Order allow,deny
     Allow from all
-</FilesMatch> 
+</FilesMatch>
+
+# Aumentar límites de PHP para archivos grandes
+<IfModule mod_php.c>
+    php_value upload_max_filesize 8192M
+    php_value post_max_size 8192M
+    php_value memory_limit 8192M
+    php_value max_execution_time 7200
+    php_value max_input_time 7200
+</IfModule>
+
+# Configuración alternativa para FastCGI
+<IfModule mod_fcgid.c>
+    FcgidMaxRequestLen 8589934592
+    FcgidConnectTimeout 7200
+</IfModule>
+
+# Configuración para proxy
+<IfModule mod_proxy.c>
+    ProxyTimeout 7200
+</IfModule>
+
+# Deshabilitar límite de tiempo para scripts PHP
+<IfModule mod_php.c>
+    php_value max_execution_time 0
+    php_value max_input_time 0
+</IfModule>
+
+# Permitir métodos HTTP necesarios
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_METHOD} ^(TRACE|TRACK)
+    RewriteRule .* - [F]
+</IfModule> 
