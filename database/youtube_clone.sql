@@ -18,7 +18,9 @@ CREATE TABLE users (
     total_views INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    status ENUM('active', 'inactive', 'banned') DEFAULT 'active'
+    status ENUM('active', 'inactive', 'banned') DEFAULT 'active',
+    banner_color VARCHAR(7) DEFAULT '#dc2626',
+    banner_image VARCHAR(255) DEFAULT NULL
 );
 
 -- Tabla de videos
@@ -83,17 +85,15 @@ CREATE TABLE likes (
 );
 
 -- Tabla de suscripciones
-CREATE TABLE subscriptions (
-    id INT PRIMARY KEY AUTO_INCREMENT,
+CREATE TABLE IF NOT EXISTS subscriptions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
     subscriber_id INT NOT NULL,
     channel_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (subscriber_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (channel_id) REFERENCES users(id) ON DELETE CASCADE,
-    UNIQUE KEY unique_subscription (subscriber_id, channel_id),
-    INDEX idx_subscriber_id (subscriber_id),
-    INDEX idx_channel_id (channel_id)
-);
+    UNIQUE KEY unique_subscription (subscriber_id, channel_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Tabla de visualizaciones de videos
 CREATE TABLE video_views (
@@ -232,4 +232,9 @@ BEGIN
     END IF;
 END//
 
-DELIMITER ; 
+DELIMITER ;
+
+-- Agregar campos para personalización del perfil
+ALTER TABLE users 
+ADD COLUMN banner_color VARCHAR(7) DEFAULT '#dc2626',
+ADD COLUMN banner_image VARCHAR(255) DEFAULT NULL;

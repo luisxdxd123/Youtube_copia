@@ -44,10 +44,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $description = trim($_POST['description'] ?? '');
     $category = $_POST['category'] ?? '';
     
-    if (!isset($_FILES['video'])) {
-        $response['error'] = 'No se recibió ningún archivo de video.';
+    if (!isset($_FILES['video']) || !isset($_FILES['thumbnail'])) {
+        $response['error'] = 'Debes subir tanto el video como la miniatura.';
     } else {
         $video = $_FILES['video'];
+        $thumbnail = $_FILES['thumbnail'];
         
         if (empty($title)) {
             $response['error'] = 'El título es obligatorio.';
@@ -76,6 +77,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         } elseif ($video['size'] == 0) {
             $response['error'] = 'El archivo está vacío o no se pudo leer.';
+        } elseif ($thumbnail['error'] !== UPLOAD_ERR_OK) {
+            switch ($thumbnail['error']) {
+                case UPLOAD_ERR_INI_SIZE:
+                    $response['error'] = "La miniatura es demasiado grande.";
+                    break;
+                case UPLOAD_ERR_FORM_SIZE:
+                    $response['error'] = "La miniatura excede el tamaño máximo permitido.";
+                    break;
+                case UPLOAD_ERR_PARTIAL:
+                    $response['error'] = "La miniatura se subió parcialmente. Intenta de nuevo.";
+                    break;
+                case UPLOAD_ERR_NO_FILE:
+                    $response['error'] = "No se seleccionó ninguna miniatura.";
+                    break;
+                default:
+                    $response['error'] = "Error al subir la miniatura (código: " . $thumbnail['error'] . ")";
+            }
+        } elseif ($video['size'] == 0) {
+            $response['error'] = 'El archivo de video está vacío o no se pudo leer.';
+        } elseif ($thumbnail['size'] == 0) {
+            $response['error'] = 'El archivo de miniatura está vacío o no se pudo leer.';
+        } elseif (!in_array($thumbnail['type'], ['image/jpeg', 'image/png', 'image/gif'])) {
+            $response['error'] = 'El formato de la miniatura debe ser JPG, PNG o GIF.';
+        } elseif ($thumbnail['size'] > 5 * 1024 * 1024) { // 5MB max
+            $response['error'] = 'La miniatura no debe superar los 5MB.';
         } else {
             $upload_dir = '../uploads/videos/';
             $thumbnails_dir = '../uploads/thumbnails/';
@@ -93,28 +119,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $video_name = uniqid('video_') . '.' . $file_extension;
             $video_path = $upload_dir . $video_name;
             
-            // Variable para almacenar la ruta de la miniatura
-            $thumbnail_path = null;
+            // Procesar la miniatura
+            $thumb_extension = pathinfo($thumbnail['name'], PATHINFO_EXTENSION);
+            $thumb_name = uniqid('thumb_') . '.' . $thumb_extension;
+            $thumbnail_path = $thumbnails_dir . $thumb_name;
             
-            // Procesar la miniatura si se proporcionó una
-            if (isset($_FILES['thumbnail']) && $_FILES['thumbnail']['error'] === UPLOAD_ERR_OK) {
-                $thumbnail = $_FILES['thumbnail'];
-                $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
-                
-                if (!in_array($thumbnail['type'], $allowed_types)) {
-                    $response['error'] = 'El formato de la miniatura no es válido. Use JPG, PNG o GIF.';
-                } else {
-                    $thumb_extension = pathinfo($thumbnail['name'], PATHINFO_EXTENSION);
-                    $thumb_name = uniqid('thumb_') . '.' . $thumb_extension;
-                    $thumbnail_path = $thumbnails_dir . $thumb_name;
-                    
-                    if (!move_uploaded_file($thumbnail['tmp_name'], $thumbnail_path)) {
-                        $response['error'] = 'No se pudo guardar la miniatura.';
-                    }
+            // Primero intentamos mover la miniatura
+            if (!move_uploaded_file($thumbnail['tmp_name'], $thumbnail_path)) {
+                $response['error'] = 'No se pudo guardar la miniatura.';
+            } 
+            // Si la miniatura se movió correctamente, intentamos mover el video
+            elseif (!move_uploaded_file($video['tmp_name'], $video_path)) {
+                $response['error'] = 'No se pudo guardar el video.';
+                // Si falla el video, eliminamos la miniatura
+                if (file_exists($thumbnail_path)) {
+                    unlink($thumbnail_path);
                 }
-            }
-            
-            if (!$response['error'] && move_uploaded_file($video['tmp_name'], $video_path)) {
+            } else {
                 $duration = 120; // Valor por defecto
                 
                 // Guardar en base de datos
@@ -127,13 +148,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } else {
                     $response['error'] = 'Error al guardar en la base de datos.';
                     if (file_exists($video_path)) unlink($video_path);
-                    if ($thumbnail_path && file_exists($thumbnail_path)) unlink($thumbnail_path);
+                    if (file_exists($thumbnail_path)) unlink($thumbnail_path);
                 }
-            } else {
-                if (!$response['error']) {
-                    $response['error'] = 'No se pudo mover el archivo de video al directorio de destino.';
-                }
-                if ($thumbnail_path && file_exists($thumbnail_path)) unlink($thumbnail_path);
             }
         }
     }
@@ -183,140 +199,275 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            border: 2px dashed #e5e7eb;
+            border-radius: 0.5rem;
+            background-color: #f9fafb;
+            transition: all 0.3s ease;
+            height: 100%;
+            min-height: 200px;
+        }
+
+        .file-input-button:hover {
+            border-color: #dc2626;
+            background-color: #fef2f2;
+        }
+
+        .progress-bar-animation {
+            animation: progress-bar-stripes 1s linear infinite;
+            background-image: linear-gradient(45deg, rgba(255,255,255,.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.15) 50%, rgba(255,255,255,.15) 75%, transparent 75%, transparent);
+            background-size: 1rem 1rem;
+        }
+
+        @keyframes progress-bar-stripes {
+            from { background-position: 1rem 0; }
+            to { background-position: 0 0; }
+        }
+
+        .upload-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .upload-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-50 font-sans">
     <?php include 'header.php'; ?>
 
-    <div class="container mx-auto px-4 py-8 mt-16 max-w-2xl">
-        <div class="bg-white rounded-lg shadow-lg p-8">
-            <h1 class="text-3xl font-bold text-gray-800 mb-8 flex items-center">
-                <i class="fas fa-upload mr-3 text-yutube-600"></i>
-                Subir Video
-            </h1>
+    <div class="container mx-auto px-4 py-8 mt-16">
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <div class="flex items-center justify-between mb-6 pb-4 border-b">
+                <h1 class="text-3xl font-bold text-gray-800 flex items-center">
+                    <i class="fas fa-upload mr-3 text-yutube-600"></i>
+                    Subir Video
+                </h1>
+                <a href="index.php" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </a>
+            </div>
 
-            <!-- Información del servidor -->
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                <h3 class="font-semibold text-blue-800 mb-2">Límites del Servidor:</h3>
-                <div class="text-sm text-blue-700 grid grid-cols-2 gap-2">
-                    <div>📁 Upload máximo: <strong><?= $max_upload ?></strong></div>
-                    <div>📝 POST máximo: <strong><?= $max_post ?></strong></div>
-                    <div>🧠 Memoria: <strong><?= $memory_limit ?></strong></div>
-                    <div>⏱️ Tiempo límite: <strong><?= $max_execution_time ?>s</strong></div>
+            <!-- Información del servidor en una línea -->
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+                <div class="flex items-center justify-between flex-wrap gap-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-info-circle text-blue-500 mr-2"></i>
+                        <span class="font-semibold text-blue-800">Límites:</span>
+                    </div>
+                    <div class="flex items-center space-x-6">
+                        <div class="flex items-center">
+                            <i class="fas fa-upload text-blue-500 mr-2"></i>
+                            <span class="text-sm text-gray-600">Upload: <strong class="text-blue-700"><?= $max_upload ?></strong></span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-file-alt text-blue-500 mr-2"></i>
+                            <span class="text-sm text-gray-600">POST: <strong class="text-blue-700"><?= $max_post ?></strong></span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-memory text-blue-500 mr-2"></i>
+                            <span class="text-sm text-gray-600">RAM: <strong class="text-blue-700"><?= $memory_limit ?></strong></span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-clock text-blue-500 mr-2"></i>
+                            <span class="text-sm text-gray-600">Tiempo: <strong class="text-blue-700"><?= $max_execution_time ?>s</strong></span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <?php if ($error): ?>
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-                <strong>Error:</strong> <?= htmlspecialchars($error) ?>
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-lg">
+                <div class="flex items-center mb-2">
+                    <i class="fas fa-exclamation-circle text-red-500 mr-2"></i>
+                    <strong>Error:</strong>
+                </div>
+                <p><?= htmlspecialchars($error) ?></p>
                 
                 <?php if (strpos($error, 'demasiado grande') !== false || strpos($error, 'Límite del servidor') !== false): ?>
-                <div class="mt-3 p-3 bg-yellow-50 border border-yellow-300 rounded">
-                    <p class="text-yellow-800 text-sm mb-2">
-                        <strong>💡 Solución:</strong> Necesitas aumentar los límites de XAMPP para subir videos grandes.
-                    </p>
-                    <a href="fix-xampp-limits.php" class="inline-block bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 text-sm">
-                        🔧 Configurar XAMPP para Videos de 2GB
-                    </a>
+                <div class="mt-4 p-4 bg-yellow-50 border border-yellow-300 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <p class="text-yellow-800 text-sm flex items-center">
+                            <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                            <strong>Solución:</strong> Necesitas aumentar los límites de XAMPP para subir videos grandes.
+                        </p>
+                        <a href="fix-xampp-limits.php" class="inline-flex items-center bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition duration-200">
+                            <i class="fas fa-wrench mr-2"></i>
+                            Configurar XAMPP
+                        </a>
+                    </div>
                 </div>
                 <?php endif; ?>
             </div>
             <?php endif; ?>
 
-            <?php if (!empty($debug_info)): ?>
-            <div class="bg-gray-100 border border-gray-300 text-gray-700 px-4 py-3 rounded mb-6">
-                <strong>Información de debug:</strong>
-                <ul class="list-disc list-inside mt-2 text-sm">
-                    <?php foreach ($debug_info as $info): ?>
-                    <li><?= htmlspecialchars($info) ?></li>
-                    <?php endforeach; ?>
-                </ul>
-            </div>
-            <?php endif; ?>
+            <form id="uploadForm" method="POST" enctype="multipart/form-data">
+                <div class="upload-grid">
+                    <!-- Columna Izquierda: Información del Video -->
+                    <div class="space-y-4">
+                        <div class="bg-gray-50 rounded-xl p-6">
+                            <h2 class="text-xl font-semibold text-gray-800 mb-4">Información del Video</h2>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="title" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Título del Video <span class="text-yutube-600">*</span>
+                                    </label>
+                                    <input type="text" name="title" id="title" required
+                                           placeholder="Escribe un título descriptivo"
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yutube-500 focus:border-yutube-500 transition duration-200">
+                                </div>
 
-            <form id="uploadForm" method="POST" enctype="multipart/form-data" class="space-y-6">
-                <div>
-                    <label for="title" class="block text-sm font-medium text-gray-700 mb-1">
-                        Título del Video
-                    </label>
-                    <input type="text" name="title" id="title" required
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-yutube-500 focus:border-yutube-500">
-                </div>
+                                <div>
+                                    <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Descripción
+                                    </label>
+                                    <textarea name="description" id="description" rows="3"
+                                              placeholder="Describe tu video..."
+                                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yutube-500 focus:border-yutube-500 transition duration-200"></textarea>
+                                </div>
 
-                <div>
-                    <label for="description" class="block text-sm font-medium text-gray-700 mb-1">
-                        Descripción
-                    </label>
-                    <textarea name="description" id="description" rows="4"
-                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-yutube-500 focus:border-yutube-500"></textarea>
-                </div>
+                                <div>
+                                    <label for="category" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Categoría <span class="text-yutube-600">*</span>
+                                    </label>
+                                    <select name="category" id="category" required
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yutube-500 focus:border-yutube-500 transition duration-200">
+                                        <option value="">Selecciona una categoría</option>
+                                        <option value="gaming">Gaming</option>
+                                        <option value="music">Música</option>
+                                        <option value="education">Educación</option>
+                                        <option value="entertainment">Entretenimiento</option>
+                                        <option value="sports">Deportes</option>
+                                        <option value="technology">Tecnología</option>
+                                        <option value="other">Otros</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
 
-                <div>
-                    <label for="category" class="block text-sm font-medium text-gray-700 mb-1">
-                        Categoría
-                    </label>
-                    <select name="category" id="category" required
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-yutube-500 focus:border-yutube-500">
-                        <option value="">Selecciona una categoría</option>
-                        <option value="gaming">Gaming</option>
-                        <option value="music">Música</option>
-                        <option value="education">Educación</option>
-                        <option value="entertainment">Entretenimiento</option>
-                        <option value="sports">Deportes</option>
-                        <option value="technology">Tecnología</option>
-                        <option value="other">Otros</option>
-                    </select>
-                </div>
+                        <!-- Barra de Progreso -->
+                        <div id="uploadProgress" class="hidden bg-gray-50 rounded-xl p-6">
+                            <div class="flex items-center justify-between text-sm text-gray-600 mb-4">
+                                <div class="flex items-center">
+                                    <i class="fas fa-spinner fa-spin mr-2"></i>
+                                    <span id="uploadStatus">Preparando subida...</span>
+                                </div>
+                                <span id="uploadPercentage" class="font-semibold">0%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+                                <div id="progressBar" class="bg-yutube-600 h-4 progress-bar-animation" style="width: 0%"></div>
+                            </div>
+                            <div class="flex justify-between text-sm text-gray-500 mt-2">
+                                <span id="uploadSpeed">Velocidad: -- MB/s</span>
+                                <span id="timeRemaining">Tiempo restante: --:--</span>
+                            </div>
+                        </div>
+                    </div>
 
-                <div>
-                    <label for="video" class="block text-sm font-medium text-gray-700 mb-1">
-                        Archivo de Video
-                    </label>
-                    <input type="file" name="video" id="video" required accept="video/*"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-yutube-500 focus:border-yutube-500"
-                           onchange="showFileInfo(this, 'videoInfo')">
-                    <p class="mt-1 text-sm text-gray-500">
-                        Formatos aceptados: MP4, AVI, MOV, etc. Máximo 2GB
-                    </p>
-                    <div id="videoInfo" class="mt-2 hidden p-3 bg-gray-50 rounded-lg"></div>
-                </div>
+                    <!-- Columna Derecha: Archivos Multimedia -->
+                    <div class="space-y-4">
+                        <div class="bg-gray-50 rounded-xl p-6">
+                            <h2 class="text-xl font-semibold text-gray-800 mb-4">Archivos Multimedia</h2>
+                            
+                            <div class="space-y-6">
+                                <!-- Video Upload -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Archivo de Video <span class="text-yutube-600">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <div class="file-input-wrapper">
+                                            <div class="file-input-button" id="videoDropzone">
+                                                <div class="text-center">
+                                                    <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-3"></i>
+                                                    <p class="text-gray-600">Arrastra y suelta tu video aquí o</p>
+                                                    <button type="button" class="mt-2 px-4 py-2 bg-yutube-600 text-white rounded-lg hover:bg-yutube-700 transition duration-200">
+                                                        Seleccionar Archivo
+                                                    </button>
+                                                    <p class="text-sm text-gray-500 mt-2">MP4, AVI, MOV (Máx. 2GB)</p>
+                                                </div>
+                                            </div>
+                                            <input type="file" name="video" id="video" required accept="video/*"
+                                                   class="hidden" onchange="showFileInfo(this, 'videoInfo')">
+                                        </div>
+                                    </div>
+                                    <div id="videoInfo" class="hidden mt-3 p-3 bg-white rounded-lg border border-gray-200"></div>
+                                </div>
 
-                <div>
-                    <label for="thumbnail" class="block text-sm font-medium text-gray-700 mb-1">
-                        Miniatura del Video (Opcional)
-                    </label>
-                    <input type="file" name="thumbnail" id="thumbnail" accept="image/*"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-yutube-500 focus:border-yutube-500">
-                    <p class="mt-1 text-sm text-gray-500">
-                        Formatos aceptados: JPG, PNG, GIF. Tamaño recomendado: 1280x720 píxeles
-                    </p>
-                    <div id="thumbnail-preview" class="mt-2 hidden">
-                        <img src="" alt="Vista previa de la miniatura" class="max-w-xs rounded-lg shadow-md">
+                                <!-- Thumbnail Upload -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Miniatura del Video <span class="text-yutube-600">*</span>
+                                    </label>
+                                    <div class="grid md:grid-cols-2 gap-4">
+                                        <div class="relative">
+                                            <div class="file-input-wrapper">
+                                                <div class="file-input-button" id="thumbnailDropzone">
+                                                    <div class="text-center">
+                                                        <i class="fas fa-image text-4xl text-gray-400 mb-3"></i>
+                                                        <p class="text-gray-600">Arrastra y suelta tu miniatura aquí o</p>
+                                                        <button type="button" class="mt-2 px-4 py-2 bg-yutube-600 text-white rounded-lg hover:bg-yutube-700 transition duration-200">
+                                                            Seleccionar Imagen
+                                                        </button>
+                                                        <p class="text-sm text-gray-500 mt-2">JPG, PNG, GIF (1280x720)</p>
+                                                    </div>
+                                                </div>
+                                                <input type="file" name="thumbnail" id="thumbnail" required accept="image/*"
+                                                       class="hidden" onchange="previewThumbnail(this)">
+                                            </div>
+                                        </div>
+                                        <div id="thumbnail-preview" class="hidden">
+                                            <div class="aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                                                <img src="" alt="Vista previa de la miniatura" class="w-full h-full object-contain">
+                                            </div>
+                                            <button type="button" onclick="clearThumbnail()" 
+                                                    class="mt-2 w-full px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition duration-200 flex items-center justify-center">
+                                                <i class="fas fa-trash-alt mr-2"></i>
+                                                Eliminar miniatura
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Barra de Progreso -->
-                <div id="uploadProgress" class="hidden">
-                    <div class="mb-2 flex items-center justify-between text-sm text-gray-600">
-                        <span id="uploadStatus">Preparando subida...</span>
-                        <span id="uploadPercentage">0%</span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-4">
-                        <div id="progressBar" class="bg-yutube-600 h-4 rounded-full transition-all duration-300" style="width: 0%"></div>
-                    </div>
-                    <div class="mt-2 text-sm text-gray-500">
-                        <span id="uploadSpeed">Velocidad: -- MB/s</span>
-                        <span class="mx-2">|</span>
-                        <span id="timeRemaining">Tiempo restante: --:--</span>
-                    </div>
-                </div>
-
-                <div class="flex space-x-4">
-                    <button type="submit" class="flex-1 bg-yutube-600 text-white py-3 px-6 rounded-lg hover:bg-yutube-700 focus:outline-none focus:ring-2 focus:ring-yutube-500 focus:ring-offset-2">
+                <!-- Botones de Acción -->
+                <div class="flex space-x-4 mt-6">
+                    <button type="submit" class="flex-1 bg-yutube-600 text-white py-3 px-6 rounded-xl hover:bg-yutube-700 focus:outline-none focus:ring-2 focus:ring-yutube-500 focus:ring-offset-2 transition duration-200 flex items-center justify-center">
                         <i class="fas fa-upload mr-2"></i>
                         Subir Video
                     </button>
-                    <a href="index.php" class="flex-1 bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 text-center">
+                    <a href="index.php" class="flex-1 bg-gray-100 text-gray-700 py-3 px-6 rounded-xl hover:bg-gray-200 transition duration-200 flex items-center justify-center">
                         <i class="fas fa-times mr-2"></i>
                         Cancelar
                     </a>
@@ -326,6 +477,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <script>
+        // Función para manejar el drag & drop
+        function setupDropzone(dropzoneId, inputId) {
+            const dropzone = document.getElementById(dropzoneId);
+            const input = document.getElementById(inputId);
+
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropzone.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight(e) {
+                dropzone.classList.add('border-yutube-600', 'bg-yutube-50');
+            }
+
+            function unhighlight(e) {
+                dropzone.classList.remove('border-yutube-600', 'bg-yutube-50');
+            }
+
+            dropzone.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+
+                input.files = files;
+                
+                // Trigger change event
+                const event = new Event('change', { bubbles: true });
+                input.dispatchEvent(event);
+            }
+
+            // También manejar clicks en el dropzone
+            dropzone.addEventListener('click', () => {
+                input.click();
+            });
+        }
+
+        // Configurar los dropzones
+        setupDropzone('videoDropzone', 'video');
+        setupDropzone('thumbnailDropzone', 'thumbnail');
+
         function formatSize(bytes) {
             if (bytes === 0) return '0 Bytes';
             const k = 1024;
@@ -338,16 +542,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             return new Date(seconds * 1000).toISOString().substr(14, 5);
         }
 
+        function clearThumbnail() {
+            const input = document.getElementById('thumbnail');
+            const preview = document.getElementById('thumbnail-preview');
+            const previewImg = preview.querySelector('img');
+            
+            input.value = '';
+            preview.classList.add('hidden');
+            previewImg.src = '';
+        }
+
         function showFileInfo(input, infoId) {
             const infoDiv = document.getElementById(infoId);
             if (input.files && input.files[0]) {
                 const file = input.files[0];
                 infoDiv.innerHTML = `
-                    <div class="text-sm">
-                        <p class="font-semibold text-gray-700">📁 Archivo seleccionado:</p>
-                        <p class="text-gray-600">Nombre: ${file.name}</p>
-                        <p class="text-gray-600">Tamaño: ${formatSize(file.size)}</p>
-                        <p class="text-gray-600">Tipo: ${file.type}</p>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <i class="fas fa-file-video text-2xl text-yutube-600"></i>
+                            <div>
+                                <p class="font-medium text-gray-900">${file.name}</p>
+                                <p class="text-sm text-gray-500">
+                                    <span class="mr-2">${formatSize(file.size)}</span>
+                                    <span>${file.type}</span>
+                                </p>
+                            </div>
+                        </div>
+                        <button type="button" onclick="clearFile('${input.id}', '${infoId}')" 
+                                class="text-gray-400 hover:text-gray-600 p-1">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
                 `;
                 infoDiv.classList.remove('hidden');
@@ -356,23 +580,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        // Vista previa de la miniatura
-        document.getElementById('thumbnail').addEventListener('change', function(e) {
+        function clearFile(inputId, infoId) {
+            const input = document.getElementById(inputId);
+            input.value = '';
+            document.getElementById(infoId).classList.add('hidden');
+        }
+
+        function previewThumbnail(input) {
             const preview = document.getElementById('thumbnail-preview');
             const previewImg = preview.querySelector('img');
-            const file = e.target.files[0];
+            const file = input.files[0];
 
             if (file) {
+                // Validar el tipo de archivo
+                if (!file.type.startsWith('image/')) {
+                    alert('Por favor, selecciona una imagen válida (JPG, PNG o GIF)');
+                    input.value = '';
+                    preview.classList.add('hidden');
+                    return;
+                }
+
+                // Validar el tamaño del archivo (máximo 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('La imagen es demasiado grande. El tamaño máximo es 5MB');
+                    input.value = '';
+                    preview.classList.add('hidden');
+                    return;
+                }
+
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     previewImg.src = e.target.result;
                     preview.classList.remove('hidden');
+
+                    // Validar las dimensiones de la imagen silenciosamente
+                    const img = new Image();
+                    img.onload = function() {
+                        // Solo validamos internamente, sin mostrar mensaje
+                        console.log(`Dimensiones de la miniatura: ${this.width}x${this.height}`);
+                    }
+                    img.src = e.target.result;
                 }
                 reader.readAsDataURL(file);
             } else {
                 preview.classList.add('hidden');
             }
-        });
+        }
 
         // Manejo de la subida con barra de progreso
         document.getElementById('uploadForm').addEventListener('submit', function(e) {
