@@ -61,7 +61,7 @@ if ($_POST) {
     <div class="max-w-md w-full mx-4">
         <div class="text-center mb-8">
             <a href="../index.php" class="inline-flex items-center justify-center">
-                <img src="./assets/img/Logo_VideosNet.png" alt="VideoNetBandera Logo" class="h-12 w-36 object-contain">
+                <img src="./assets/img/Logo_VideosNet.png" alt="VideoNetBandera Logo" class="h-16 w-48 object-contain">
             </a>
             <p class="text-gray-600 mt-2">Inicia sesión en tu cuenta</p>
         </div>
