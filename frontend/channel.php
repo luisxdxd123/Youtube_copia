@@ -65,7 +65,7 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($channel['username']) ?> - videoNetBandera</title>
+    <title>Canal - videoNetBandera</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -78,11 +78,11 @@ try {
                     },
                     colors: {
                         'yutube': {
-                            50: '#fef2f2',
-                            100: '#fee2e2',
-                            500: '#ef4444',
-                            600: '#dc2626',
-                            700: '#b91c1c',
+                            50: '#eff6ff',   // azul claro
+                            100: '#dbeafe',  // azul muy claro
+                            500: '#3b82f6',  // azul medio
+                            600: '#2563eb',  // azul principal
+                            700: '#1d4ed8',  // azul oscuro
                         },
                     },
                 },
@@ -172,13 +172,13 @@ try {
 
                     <?php if (isset($_SESSION['user_id']) && $_SESSION['user_id'] != $channel_id): ?>
                         <button onclick="toggleSubscription(<?= $channel_id ?>, this)" 
-                                class="mt-4 md:mt-0 px-8 py-3 rounded-full transition duration-200 <?= $channel['is_subscribed'] ? 'bg-gray-200 text-gray-800 hover:bg-gray-300' : 'bg-yutube-600 text-white hover:bg-yutube-700' ?>">
+                                class="mt-4 md:mt-0 px-8 py-3 rounded-full transition duration-200 <?= $channel['is_subscribed'] ? 'bg-gray-200 text-gray-800 hover:bg-gray-300' : 'bg-blue-600 text-white hover:bg-blue-700' ?>">
                             <i class="fas <?= $channel['is_subscribed'] ? 'fa-bell' : 'fa-plus' ?> mr-2"></i>
                             <span class="subscription-text"><?= $channel['is_subscribed'] ? 'Suscrito' : 'Suscribirse' ?></span>
                             <span class="subscribers-count hidden"><?= $stats['total_subscribers'] ?></span>
                         </button>
                     <?php elseif (!isset($_SESSION['user_id'])): ?>
-                        <a href="login.php" class="mt-4 md:mt-0 px-8 py-3 rounded-full bg-yutube-600 text-white hover:bg-yutube-700 transition duration-200">
+                        <a href="login.php" class="mt-4 md:mt-0 px-8 py-3 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition duration-200">
                             <i class="fas fa-plus mr-2"></i>
                             Suscribirse
                         </a>
@@ -230,7 +230,7 @@ try {
                                         </span>
                                     </div>
                                     <div class="p-4">
-                                        <h3 class="font-semibold text-gray-900 line-clamp-2 mb-2 group-hover:text-yutube-600">
+                                        <h3 class="font-semibold text-gray-900 line-clamp-2 mb-2 group-hover:text-blue-600">
                                             <?= htmlspecialchars($video['title']) ?>
                                         </h3>
                                         <div class="flex items-center text-xs text-gray-500">
@@ -240,7 +240,7 @@ try {
                                         </div>
                                         <div class="flex items-center space-x-3 mt-2 text-xs text-gray-500">
                                             <span class="flex items-center">
-                                                <i class="fas fa-thumbs-up text-yutube-600 mr-1"></i>
+                                                <i class="fas fa-thumbs-up text-blue-600 mr-1"></i>
                                                 <?= number_format($video['likes_count']) ?>
                                             </span>
                                             <span class="flex items-center">
@@ -285,17 +285,13 @@ try {
                         const subscriptionText = button.querySelector('.subscription-text');
                         
                         if (data.isSubscribed) {
-                            button.classList.remove('bg-yutube-600', 'hover:bg-yutube-700', 'text-white');
+                            button.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'text-white');
                             button.classList.add('bg-gray-200', 'text-gray-800', 'hover:bg-gray-300');
-                            button.querySelector('i').classList.remove('fa-plus');
-                            button.querySelector('i').classList.add('fa-bell');
-                            subscriptionText.textContent = 'Suscrito';
+                            button.innerHTML = '<i class="fas fa-bell mr-2"></i>Suscrito <span class="subscribers-count ml-1">' + data.subscribers_count + '</span>';
                         } else {
                             button.classList.remove('bg-gray-200', 'text-gray-800', 'hover:bg-gray-300');
-                            button.classList.add('bg-yutube-600', 'hover:bg-yutube-700', 'text-white');
-                            button.querySelector('i').classList.remove('fa-bell');
-                            button.querySelector('i').classList.add('fa-plus');
-                            subscriptionText.textContent = 'Suscribirse';
+                            button.classList.add('bg-blue-600', 'text-white', 'hover:bg-blue-700');
+                            button.innerHTML = '<i class="fas fa-plus mr-2"></i>Suscribirse <span class="subscribers-count ml-1">' + data.subscribers_count + '</span>';
                         }
                         
                         // Actualizar todos los contadores de suscriptores en la página

@@ -168,7 +168,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Subir Video - YuTube</title>
+    <title>Subir Video - videoNetBandera</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -181,11 +181,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     },
                     colors: {
                         'yutube': {
-                            50: '#fef2f2',
-                            100: '#fee2e2',
-                            500: '#ef4444',
-                            600: '#dc2626',
-                            700: '#b91c1c',
+                            50: '#eff6ff',   // azul claro
+                            100: '#dbeafe',  // azul muy claro
+                            500: '#3b82f6',  // azul medio
+                            600: '#2563eb',  // azul principal
+                            700: '#1d4ed8',  // azul oscuro
                         },
                     },
                 },
@@ -463,8 +463,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <!-- Botones de Acción -->
                 <div class="flex space-x-4 mt-6">
-                    <button type="submit" class="flex-1 bg-yutube-600 text-white py-3 px-6 rounded-xl hover:bg-yutube-700 focus:outline-none focus:ring-2 focus:ring-yutube-500 focus:ring-offset-2 transition duration-200 flex items-center justify-center">
-                        <i class="fas fa-upload mr-2"></i>
+                    <button type="submit" 
+                            class="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-200">
+                        <i class="fas fa-cloud-upload-alt mr-2"></i>
                         Subir Video
                     </button>
                     <a href="index.php" class="flex-1 bg-gray-100 text-gray-700 py-3 px-6 rounded-xl hover:bg-gray-200 transition duration-200 flex items-center justify-center">

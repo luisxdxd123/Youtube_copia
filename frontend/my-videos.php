@@ -18,7 +18,7 @@ $videos = $stmt->fetchAll();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mis Videos - YuTube</title>
+    <title>Mis Videos - videoNetBandera</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -31,11 +31,11 @@ $videos = $stmt->fetchAll();
                     },
                     colors: {
                         'yutube': {
-                            50: '#fef2f2',
-                            100: '#fee2e2',
-                            500: '#ef4444',
-                            600: '#dc2626',
-                            700: '#b91c1c',
+                            50: '#eff6ff',   // azul claro
+                            100: '#dbeafe',  // azul muy claro
+                            500: '#3b82f6',  // azul medio
+                            600: '#2563eb',  // azul principal
+                            700: '#1d4ed8',  // azul oscuro
                         },
                     },
                 },
@@ -57,8 +57,9 @@ $videos = $stmt->fetchAll();
     <div class="container mx-auto px-4 py-8 mt-16">
         <div class="flex items-center justify-between mb-8">
             <h1 class="text-2xl font-bold text-gray-900">Mis Videos</h1>
-            <a href="upload.php" class="bg-yutube-600 text-white px-6 py-3 rounded-full hover:bg-yutube-700 transition duration-200">
-                <i class="fas fa-plus mr-2"></i>Subir Nuevo Video
+            <a href="upload.php" class="inline-block bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition duration-200">
+                <i class="fas fa-upload mr-2"></i>
+                Subir Nuevo Video
             </a>
         </div>
 
@@ -67,8 +68,8 @@ $videos = $stmt->fetchAll();
             <i class="fas fa-video text-7xl text-gray-300 mb-6"></i>
             <h2 class="text-2xl font-semibold text-gray-800 mb-3">No tienes videos</h2>
             <p class="text-gray-600 mb-6">¡Sube tu primer video y comienza a compartir contenido!</p>
-            <a href="upload.php" class="inline-block bg-yutube-600 text-white px-8 py-3 rounded-full hover:bg-yutube-700 transition duration-200">
-                <i class="fas fa-plus mr-2"></i>Subir Video
+            <a href="upload.php" class="inline-block bg-blue-600 text-white px-8 py-3 rounded-full hover:bg-blue-700 transition duration-200">
+                <i class="fas fa-upload mr-2"></i>Subir Video
             </a>
         </div>
         <?php else: ?>
@@ -90,7 +91,7 @@ $videos = $stmt->fetchAll();
                     </span>
                 </div>
                 <div class="p-4">
-                    <h3 class="font-semibold text-gray-900 mb-2 line-clamp-2">
+                    <h3 class="font-semibold text-gray-900 line-clamp-2 mb-1 group-hover:text-blue-600">
                         <?= htmlspecialchars($video['title']) ?>
                     </h3>
                     <div class="flex items-center text-sm text-gray-500 mb-3">
@@ -109,7 +110,7 @@ $videos = $stmt->fetchAll();
                             <i class="fas fa-eye mr-2"></i>Ver
                         </a>
                         <button onclick="deleteVideo(<?= $video['id'] ?>)" 
-                                class="flex-1 bg-yutube-50 text-yutube-600 py-2 px-4 rounded-full hover:bg-yutube-100 transition duration-200">
+                                class="flex-1 bg-blue-50 text-blue-600 py-2 px-4 rounded-full hover:bg-blue-100 transition duration-200">
                             <i class="fas fa-trash mr-2"></i>Eliminar
                         </button>
                     </div>
@@ -131,7 +132,7 @@ $videos = $stmt->fetchAll();
                     Cancelar
                 </button>
                 <button onclick="confirmDelete()" 
-                        class="flex-1 bg-yutube-600 text-white py-2 px-4 rounded-full hover:bg-yutube-700 transition duration-200">
+                        class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-full hover:bg-blue-700 transition duration-200">
                     Eliminar
                 </button>
             </div>

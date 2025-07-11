@@ -60,20 +60,35 @@ if ($_POST) {
     <title>Registro - videoNetBandera</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'custom-blue': {
+                            100: '#eff6ff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        },
+                    },
+                },
+            },
+        }
+    </script>
 </head>
 <body class="bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen flex items-center justify-center py-12">
     <div class="max-w-lg w-full mx-4">
         <div class="text-center mb-8">
-            <a href="../index.php" class="inline-flex items-center space-x-2">
-                <i class="fab fa-youtube text-red-600 text-4xl"></i>
-                <span class="text-3xl font-bold text-gray-800">videoNetBandera</span>
+            <a href="../index.php" class="inline-flex items-center justify-center">
+                <img src="./assets/img/Logo_VideosNet.png" alt="VideoNetBandera Logo" class="h-16 w-48 object-contain">
             </a>
             <p class="text-gray-600 mt-2">Crea tu cuenta y únete a la comunidad</p>
         </div>
 
         <div class="bg-white rounded-xl shadow-xl p-8">
             <?php if ($error): ?>
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+            <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded mb-6">
                 <i class="fas fa-exclamation-circle mr-2"></i>
                 <?= htmlspecialchars($error) ?>
             </div>
@@ -87,7 +102,7 @@ if ($_POST) {
                         </label>
                         <input type="text" id="first_name" name="first_name" required
                                value="<?= htmlspecialchars($_POST['first_name'] ?? '') ?>"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                placeholder="Tu nombre">
                     </div>
 
@@ -97,7 +112,7 @@ if ($_POST) {
                         </label>
                         <input type="text" id="last_name" name="last_name" required
                                value="<?= htmlspecialchars($_POST['last_name'] ?? '') ?>"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                placeholder="Tu apellido">
                     </div>
                 </div>
@@ -108,7 +123,7 @@ if ($_POST) {
                     </label>
                     <input type="text" id="username" name="username" required
                            value="<?= htmlspecialchars($_POST['username'] ?? '') ?>"
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                            placeholder="nombre_usuario" minlength="3">
                     <p class="text-xs text-gray-500 mt-1">Mínimo 3 caracteres. Este será tu nombre de canal.</p>
                 </div>
@@ -119,7 +134,7 @@ if ($_POST) {
                     </label>
                     <input type="email" id="email" name="email" required
                            value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                            placeholder="tu@email.com">
                 </div>
 
@@ -128,7 +143,7 @@ if ($_POST) {
                         <i class="fas fa-lock mr-2"></i>Contraseña
                     </label>
                     <input type="password" id="password" name="password" required
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                            placeholder="••••••••" minlength="6">
                     <p class="text-xs text-gray-500 mt-1">Mínimo 6 caracteres.</p>
                 </div>
@@ -138,12 +153,12 @@ if ($_POST) {
                         <i class="fas fa-lock mr-2"></i>Confirmar contraseña
                     </label>
                     <input type="password" id="confirm_password" name="confirm_password" required
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                            placeholder="••••••••">
                 </div>
 
                 <button type="submit" 
-                        class="w-full bg-red-600 text-white py-3 px-4 rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-200 font-medium">
+                        class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 font-medium">
                     <i class="fas fa-user-plus mr-2"></i>
                     Crear Cuenta
                 </button>
@@ -152,7 +167,7 @@ if ($_POST) {
             <div class="mt-6 text-center">
                 <p class="text-gray-600">
                     ¿Ya tienes cuenta? 
-                    <a href="login.php" class="text-red-600 hover:text-red-700 font-medium">
+                    <a href="login.php" class="text-blue-600 hover:text-blue-700 font-medium">
                         Inicia sesión aquí
                     </a>
                 </p>

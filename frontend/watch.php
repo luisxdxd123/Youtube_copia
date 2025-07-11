@@ -49,7 +49,7 @@ if (isset($_SESSION['user_id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($video['title']) ?> - YuTube</title>
+    <title>Ver Video - videoNetBandera</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -62,11 +62,11 @@ if (isset($_SESSION['user_id'])) {
                     },
                     colors: {
                         'yutube': {
-                            50: '#fef2f2',
-                            100: '#fee2e2',
-                            500: '#ef4444',
-                            600: '#dc2626',
-                            700: '#b91c1c',
+                            50: '#eff6ff',   // azul claro
+                            100: '#dbeafe',  // azul muy claro
+                            500: '#3b82f6',  // azul medio
+                            600: '#2563eb',  // azul principal
+                            700: '#1d4ed8',  // azul oscuro
                         },
                     },
                 },
@@ -131,10 +131,9 @@ if (isset($_SESSION['user_id'])) {
                 </div>
                 <?php if (isset($_SESSION['user_id']) && $_SESSION['user_id'] != $video['user_id']): ?>
                     <button onclick="toggleSubscription(<?= $video['user_id'] ?>, this)" 
-                            class="px-6 py-2.5 rounded-full transition duration-200 <?= $video['is_subscribed'] ? 'bg-gray-200 text-gray-800 hover:bg-gray-300' : 'bg-yutube-600 text-white hover:bg-yutube-700' ?>">
+                            class="<?= $video['is_subscribed'] ? 'bg-gray-200 text-gray-800 hover:bg-gray-300' : 'bg-blue-600 text-white hover:bg-blue-700' ?> px-6 py-2 rounded-full font-medium transition duration-200">
                         <i class="fas <?= $video['is_subscribed'] ? 'fa-bell' : 'fa-plus' ?> mr-2"></i>
-                        <span class="subscription-text"><?= $video['is_subscribed'] ? 'Suscrito' : 'Suscribirse' ?></span>
-                        <span class="subscribers-count hidden"><?= $video['subscribers_count'] ?></span>
+                        <?= $video['is_subscribed'] ? 'Suscrito' : 'Suscribirse' ?>
                     </button>
                 <?php elseif (!isset($_SESSION['user_id'])): ?>
                     <a href="login.php" class="px-6 py-2.5 rounded-full bg-yutube-600 text-white hover:bg-yutube-700 transition duration-200">
@@ -266,14 +265,14 @@ if (isset($_SESSION['user_id'])) {
                         const subscriptionText = button.querySelector('.subscription-text');
                         
                         if (data.isSubscribed) {
-                            button.classList.remove('bg-yutube-600', 'hover:bg-yutube-700', 'text-white');
+                            button.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'text-white');
                             button.classList.add('bg-gray-200', 'text-gray-800', 'hover:bg-gray-300');
                             button.querySelector('i').classList.remove('fa-plus');
                             button.querySelector('i').classList.add('fa-bell');
                             subscriptionText.textContent = 'Suscrito';
                         } else {
                             button.classList.remove('bg-gray-200', 'text-gray-800', 'hover:bg-gray-300');
-                            button.classList.add('bg-yutube-600', 'hover:bg-yutube-700', 'text-white');
+                            button.classList.add('bg-blue-600', 'hover:bg-blue-700', 'text-white');
                             button.querySelector('i').classList.remove('fa-bell');
                             button.querySelector('i').classList.add('fa-plus');
                             subscriptionText.textContent = 'Suscribirse';

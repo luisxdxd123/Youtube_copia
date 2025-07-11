@@ -55,11 +55,11 @@ try {
                     },
                     colors: {
                         'yutube': {
-                            50: '#fef2f2',
-                            100: '#fee2e2',
-                            500: '#ef4444',
-                            600: '#dc2626',
-                            700: '#b91c1c',
+                            50: '#eff6ff',   // azul claro
+                            100: '#dbeafe',  // azul muy claro
+                            500: '#3b82f6',  // azul medio
+                            600: '#2563eb',  // azul principal
+                            700: '#1d4ed8',  // azul oscuro
                         },
                     },
                 },
@@ -76,7 +76,7 @@ try {
         .trend-number {
             font-size: 1.5rem;
             font-weight: 700;
-            color: #dc2626;
+            color: #2563eb;  /* Cambiado a azul */
             position: absolute;
             top: 0.5rem;
             left: 0.5rem;
@@ -96,7 +96,7 @@ try {
 
     <main class="container mx-auto px-4 py-8 mt-16">
         <div class="flex items-center space-x-4 mb-8">
-            <i class="fas fa-fire text-3xl text-yutube-600"></i>
+            <i class="fas fa-fire text-3xl text-blue-600"></i>
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">Tendencias</h1>
                 <p class="text-gray-600">Los videos más populares de la última semana</p>
@@ -129,7 +129,7 @@ try {
                                          alt="<?= htmlspecialchars($video['username']) ?>" 
                                          class="w-10 h-10 rounded-full">
                                     <div class="flex-1 min-w-0">
-                                        <h3 class="font-semibold text-gray-900 line-clamp-2 mb-1 group-hover:text-yutube-600">
+                                        <h3 class="font-semibold text-gray-900 line-clamp-2 mb-1 group-hover:text-blue-600">
                                             <?= htmlspecialchars($video['title']) ?>
                                         </h3>
                                         <p class="text-sm text-gray-600 mb-1">
@@ -142,7 +142,7 @@ try {
                                         </div>
                                         <div class="flex items-center space-x-3 mt-2 text-xs text-gray-500">
                                             <span class="flex items-center">
-                                                <i class="fas fa-thumbs-up text-yutube-600 mr-1"></i>
+                                                <i class="fas fa-thumbs-up text-blue-600 mr-1"></i>
                                                 <?= number_format($video['likes_count']) ?>
                                             </span>
                                             <span class="flex items-center">
@@ -162,7 +162,7 @@ try {
                 <i class="fas fa-fire text-7xl text-gray-300 mb-6"></i>
                 <h2 class="text-2xl font-semibold text-gray-800 mb-3">No hay videos en tendencia</h2>
                 <p class="text-gray-600 mb-6">Vuelve más tarde para ver los videos más populares</p>
-                <a href="index.php" class="inline-block bg-yutube-600 text-white px-6 py-3 rounded-full hover:bg-yutube-700 transition duration-200">
+                <a href="index.php" class="inline-block bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition duration-200">
                     <i class="fas fa-home mr-2"></i>
                     Ir al inicio
                 </a>

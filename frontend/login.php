@@ -40,20 +40,35 @@ if ($_POST) {
     <title>Iniciar Sesión - videoNetBandera</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'custom-blue': {
+                            100: '#eff6ff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        },
+                    },
+                },
+            },
+        }
+    </script>
 </head>
 <body class="bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen flex items-center justify-center">
     <div class="max-w-md w-full mx-4">
         <div class="text-center mb-8">
-            <a href="../index.php" class="inline-flex items-center space-x-2">
-                <i class="fab fa-youtube text-red-600 text-4xl"></i>
-                <span class="text-3xl font-bold text-gray-800">videoNetBandera</span>
+            <a href="../index.php" class="inline-flex items-center justify-center">
+                <img src="./assets/img/Logo_VideosNet.png" alt="VideoNetBandera Logo" class="h-12 w-36 object-contain">
             </a>
             <p class="text-gray-600 mt-2">Inicia sesión en tu cuenta</p>
         </div>
 
         <div class="bg-white rounded-xl shadow-xl p-8">
             <?php if ($error): ?>
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+            <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded mb-6">
                 <i class="fas fa-exclamation-circle mr-2"></i>
                 <?= htmlspecialchars($error) ?>
             </div>
@@ -66,7 +81,7 @@ if ($_POST) {
                     </label>
                     <input type="email" id="email" name="email" required
                            value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                            placeholder="tu@email.com">
                 </div>
 
@@ -75,12 +90,12 @@ if ($_POST) {
                         <i class="fas fa-lock mr-2"></i>Contraseña
                     </label>
                     <input type="password" id="password" name="password" required
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                            placeholder="••••••••">
                 </div>
 
                 <button type="submit" 
-                        class="w-full bg-red-600 text-white py-3 px-4 rounded-lg hover:bg-red-700 font-medium">
+                        class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 font-medium">
                     <i class="fas fa-sign-in-alt mr-2"></i>
                     Iniciar Sesión
                 </button>
@@ -89,7 +104,7 @@ if ($_POST) {
             <div class="mt-6 text-center">
                 <p class="text-gray-600">
                     ¿No tienes cuenta? 
-                    <a href="register.php" class="text-red-600 hover:text-red-700 font-medium">
+                    <a href="register.php" class="text-blue-600 hover:text-blue-700 font-medium">
                         Regístrate aquí
                     </a>
                 </p>

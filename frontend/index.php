@@ -16,7 +16,7 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YuTube - Plataforma de Videos</title>
+    <title>Inicio - videoNetBandera</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -29,11 +29,11 @@ try {
                     },
                     colors: {
                         'yutube': {
-                            50: '#fef2f2',
-                            100: '#fee2e2',
-                            500: '#ef4444',
-                            600: '#dc2626',
-                            700: '#b91c1c',
+                            50: '#eff6ff',   // azul claro
+                            100: '#dbeafe',  // azul muy claro
+                            500: '#3b82f6',  // azul medio
+                            600: '#2563eb',  // azul principal
+                            700: '#1d4ed8',  // azul oscuro
                         },
                     },
                 },
@@ -92,7 +92,7 @@ try {
                                  alt="<?= htmlspecialchars($video['username']) ?>" 
                                  class="w-10 h-10 rounded-full">
                             <div class="flex-1 min-w-0">
-                                <h3 class="font-semibold text-gray-900 line-clamp-2 mb-1 group-hover:text-yutube-600">
+                                <h3 class="font-semibold text-gray-900 line-clamp-2 mb-1 group-hover:text-blue-600">
                                     <?= htmlspecialchars($video['title']) ?>
                                 </h3>
                                 <p class="text-sm text-gray-600 mb-1">

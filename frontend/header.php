@@ -21,8 +21,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     <i class="fas fa-bars text-gray-700"></i>
                 </button>
                 <a href="./index.php" class="flex items-center space-x-2">
-                    <i class="fab fa-youtube text-yutube-600 text-3xl"></i>
-                    <span class="text-2xl font-bold">videoNetBandera</span>
+                    <img src="./assets/img/Logo_VideosNet.png" alt="VideoNetBandera Logo" class="h-14 w-34 object-contain">
                 </a>
             </div>
 

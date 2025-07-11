@@ -72,11 +72,11 @@ try {
                     },
                     colors: {
                         'yutube': {
-                            50: '#fef2f2',
-                            100: '#fee2e2',
-                            500: '#ef4444',
-                            600: '#dc2626',
-                            700: '#b91c1c',
+                            50: '#eff6ff',   // azul claro
+                            100: '#dbeafe',  // azul muy claro
+                            500: '#3b82f6',  // azul medio
+                            600: '#2563eb',  // azul principal
+                            700: '#1d4ed8',  // azul oscuro
                         },
                     },
                 },
@@ -92,7 +92,7 @@ try {
         }
         .channel-scroll {
             scrollbar-width: thin;
-            scrollbar-color: #dc2626 #f3f4f6;
+            scrollbar-color: #2563eb #f3f4f6;
         }
         .channel-scroll::-webkit-scrollbar {
             height: 6px;
@@ -102,7 +102,7 @@ try {
             border-radius: 3px;
         }
         .channel-scroll::-webkit-scrollbar-thumb {
-            background-color: #dc2626;
+            background-color: #2563eb;
             border-radius: 3px;
         }
     </style>
@@ -166,7 +166,7 @@ try {
                                              alt="<?= htmlspecialchars($video['username']) ?>" 
                                              class="w-10 h-10 rounded-full">
                                         <div class="flex-1 min-w-0">
-                                            <h3 class="font-semibold text-gray-900 line-clamp-2 mb-1 group-hover:text-yutube-600">
+                                            <h3 class="font-semibold text-gray-900 line-clamp-2 mb-1 group-hover:text-blue-600">
                                                 <?= htmlspecialchars($video['title']) ?>
                                             </h3>
                                             <p class="text-sm text-gray-600 mb-1">
@@ -190,7 +190,7 @@ try {
                         <i class="fas fa-users text-7xl text-gray-300 mb-6"></i>
                         <h2 class="text-2xl font-semibold text-gray-800 mb-3">No tienes suscripciones</h2>
                         <p class="text-gray-600 mb-6">Suscríbete a canales para ver sus videos aquí</p>
-                        <a href="index.php" class="inline-block bg-yutube-600 text-white px-6 py-3 rounded-full hover:bg-yutube-700 transition duration-200">
+                        <a href="index.php" class="inline-block bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition duration-200">
                             <i class="fas fa-compass mr-2"></i>
                             Explorar canales
                         </a>
@@ -229,12 +229,12 @@ try {
                         }
                         
                         if (data.isSubscribed) {
-                            button.classList.remove('bg-yutube-600', 'hover:bg-yutube-700');
+                            button.classList.remove('bg-blue-600', 'hover:bg-blue-700');
                             button.classList.add('bg-gray-200', 'text-gray-800', 'hover:bg-gray-300');
                             button.innerHTML = '<i class="fas fa-bell mr-2"></i>Suscrito';
                         } else {
                             button.classList.remove('bg-gray-200', 'text-gray-800', 'hover:bg-gray-300');
-                            button.classList.add('bg-yutube-600', 'hover:bg-yutube-700');
+                            button.classList.add('bg-blue-600', 'hover:bg-blue-700');
                             button.innerHTML = '<i class="fas fa-plus mr-2"></i>Suscribirse';
                         }
                     } else {
